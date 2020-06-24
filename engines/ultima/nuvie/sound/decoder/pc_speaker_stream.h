@@ -32,8 +32,9 @@ namespace Nuvie {
 
 class PCSpeakerStream : public Audio::RewindableAudioStream {
 public:
-	PCSpeakerStream() {
-		pcspkr = new PCSpeaker(SPKR_OUTPUT_RATE);
+	PCSpeakerStream(uint rate) {
+		_rate = rate;
+		pcspkr = new PCSpeaker(_rate);
 		finished = false;
 	}
 
@@ -48,7 +49,7 @@ public:
 
 	/** Sample rate of the stream. */
 	int getRate() const override {
-		return SPKR_OUTPUT_RATE;
+		return _rate;
 	}
 
 	/**
@@ -69,16 +70,13 @@ public:
 protected:
 	PCSpeaker *pcspkr;
 	bool finished;
+	uint _rate;
 };
 
 
 class PCSpeakerFreqStream : public PCSpeakerStream {
 public:
-	PCSpeakerFreqStream() {
-
-	}
-
-	PCSpeakerFreqStream(uint start, uint16 d);
+	PCSpeakerFreqStream(uint start, uint16 d, uint rate);
 	~PCSpeakerFreqStream() override;
 	uint32 getLengthInMsec();
 	int readBuffer(sint16 *buffer, const int numSamples) override;
@@ -93,11 +91,7 @@ protected:
 
 class PCSpeakerSweepFreqStream : public PCSpeakerStream {
 public:
-	PCSpeakerSweepFreqStream() {
-
-	}
-
-	PCSpeakerSweepFreqStream(uint start, uint end, uint16 d, uint16 s);
+	PCSpeakerSweepFreqStream(uint start, uint end, uint16 d, uint16 s, uint rate);
 	~PCSpeakerSweepFreqStream() override;
 	uint32 getLengthInMsec();
 	int readBuffer(sint16 *buffer, const int numSamples) override;
@@ -121,11 +115,7 @@ protected:
 
 class PCSpeakerRandomStream : public PCSpeakerStream {
 public:
-	PCSpeakerRandomStream() {
-
-	}
-
-	PCSpeakerRandomStream(uint start, uint16 d, uint16 s);
+	PCSpeakerRandomStream(uint start, uint16 d, uint16 s, uint rate);
 	~PCSpeakerRandomStream() override;
 	uint32 getLengthInMsec();
 	uint16 getNextFreqValue();
@@ -148,11 +138,7 @@ protected:
 
 class PCSpeakerStutterStream : public PCSpeakerStream {
 public:
-	PCSpeakerStutterStream() {
-
-	}
-
-	PCSpeakerStutterStream(sint16 a0, uint16 a2, uint16 a4, uint16 a6, uint16 a8);
+	PCSpeakerStutterStream(sint16 a0, uint16 a2, uint16 a4, uint16 a6, uint16 a8, uint rate);
 	~PCSpeakerStutterStream() override;
 	uint32 getLengthInMsec();
 	int readBuffer(sint16 *buffer, const int numSamples) override;

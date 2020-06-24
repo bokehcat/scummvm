@@ -46,43 +46,44 @@ bool PCSpeakerSfxManager::playSfx(SfxIdType sfx_id, uint8 volume) {
 
 bool PCSpeakerSfxManager::playSfxLooping(SfxIdType sfx_id, Audio::SoundHandle *handle, uint8 volume) {
 	Audio::AudioStream *stream = NULL;
+	uint sampleRate = mixer->getOutputRate();
 
 	if (sfx_id == NUVIE_SFX_BLOCKED) {
-		stream = new PCSpeakerFreqStream(311, 0xa);
+		stream = new PCSpeakerFreqStream(311, 0xa, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_SUCCESS) {
-		stream = new PCSpeakerFreqStream(2000, 0xa);
+		stream = new PCSpeakerFreqStream(2000, 0xa, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_FAILURE) {
-		stream = new PCSpeakerSweepFreqStream(800, 2000, 50, 1);
+		stream = new PCSpeakerSweepFreqStream(800, 2000, 50, 1, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_ATTACK_SWING) {
-		stream = new PCSpeakerSweepFreqStream(400, 750, 150, 5);
+		stream = new PCSpeakerSweepFreqStream(400, 750, 150, 5, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_RUBBER_DUCK) {
-		stream = new PCSpeakerSweepFreqStream(5000, 8000, 50, 1);
+		stream = new PCSpeakerSweepFreqStream(5000, 8000, 50, 1, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_HIT) {
-		stream = new PCSpeakerRandomStream(0x2710, 0x320, 1);
+		stream = new PCSpeakerRandomStream(0x2710, 0x320, 1, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_BROKEN_GLASS) {
-		stream = makePCSpeakerGlassSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerGlassSfxStream(sampleRate);
 	} else if (sfx_id == NUVIE_SFX_CORPSER_DRAGGED_UNDER) {
-		stream = new PCSpeakerSweepFreqStream(1200, 2000, 40, 1);
+		stream = new PCSpeakerSweepFreqStream(1200, 2000, 40, 1, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_CORPSER_REGURGITATE) {
-		stream = new PCSpeakerRandomStream(0x258, 0x1b58, 1);
+		stream = new PCSpeakerRandomStream(0x258, 0x1b58, 1, sampleRate);
 	} else if (sfx_id >= NUVIE_SFX_CASTING_MAGIC_P1 && sfx_id <= NUVIE_SFX_CASTING_MAGIC_P1_8) {
 		uint8 magic_circle = sfx_id - NUVIE_SFX_CASTING_MAGIC_P1 + 1;
-		stream = makePCSpeakerMagicCastingP1SfxStream(mixer->getOutputRate(), magic_circle);
+		stream = makePCSpeakerMagicCastingP1SfxStream(sampleRate, magic_circle);
 	} else if (sfx_id >= NUVIE_SFX_CASTING_MAGIC_P2 && sfx_id <= NUVIE_SFX_CASTING_MAGIC_P2_8) {
 		uint8 magic_circle = sfx_id - NUVIE_SFX_CASTING_MAGIC_P2 + 1;
-		stream = makePCSpeakerMagicCastingP2SfxStream(mixer->getOutputRate(), magic_circle);
+		stream = makePCSpeakerMagicCastingP2SfxStream(sampleRate, magic_circle);
 	} else if (sfx_id == NUVIE_SFX_BELL) {
-		stream = new PCSpeakerStutterStream(-1, 0x4e20, 0x3e80, 1, 0x7d0);
+		stream = new PCSpeakerStutterStream(-1, 0x4e20, 0x3e80, 1, 0x7d0, sampleRate);
 	} else if (sfx_id == NUVIE_SFX_AVATAR_DEATH) {
-		stream = makePCSpeakerAvatarDeathSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerAvatarDeathSfxStream(sampleRate);
 	} else if (sfx_id == NUVIE_SFX_KAL_LOR) {
-		stream = makePCSpeakerKalLorSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerKalLorSfxStream(sampleRate);
 	} else if (sfx_id == NUVIE_SFX_SLUG_DISSOLVE) {
-		stream = makePCSpeakerSlugDissolveSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerSlugDissolveSfxStream(sampleRate);
 	} else if (sfx_id == NUVIE_SFX_HAIL_STONE) {
-		stream = makePCSpeakerHailStoneSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerHailStoneSfxStream(sampleRate);
 	} else if (sfx_id == NUVIE_SFX_EARTH_QUAKE) {
-		stream = makePCSpeakerEarthQuakeSfxStream(mixer->getOutputRate());
+		stream = makePCSpeakerEarthQuakeSfxStream(sampleRate);
 	}
 
 	if (stream) {

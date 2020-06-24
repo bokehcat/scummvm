@@ -24,7 +24,8 @@
 namespace Ultima {
 namespace Nuvie {
 
-PCSpeakerFreqStream::PCSpeakerFreqStream(uint freq, uint16 d) {
+PCSpeakerFreqStream::PCSpeakerFreqStream(uint freq, uint16 d, uint rate) : PCSpeakerStream(rate) {
+
 	frequency = freq;
 
 	duration = d * (SPKR_OUTPUT_RATE / 1255);
@@ -71,7 +72,7 @@ int PCSpeakerFreqStream::readBuffer(sint16 *buffer, const int numSamples) {
 
 //******** PCSpeakerSweepFreqStream
 
-PCSpeakerSweepFreqStream::PCSpeakerSweepFreqStream(uint start, uint end, uint16 d, uint16 s) {
+PCSpeakerSweepFreqStream::PCSpeakerSweepFreqStream(uint start, uint end, uint16 d, uint16 s, uint rate) : PCSpeakerStream(rate) {
 	start_freq = start;
 	finish_freq = end;
 	cur_freq = start_freq;
@@ -154,7 +155,7 @@ int PCSpeakerSweepFreqStream::readBuffer(sint16 *buffer, const int numSamples) {
 
 //**************** PCSpeakerRandomStream
 
-PCSpeakerRandomStream::PCSpeakerRandomStream(uint freq, uint16 d, uint16 s) {
+PCSpeakerRandomStream::PCSpeakerRandomStream(uint freq, uint16 d, uint16 s, uint rate) : PCSpeakerStream(rate) {
 	rand_value = 0x7664;
 	base_val = freq;
 	/*
@@ -248,7 +249,7 @@ int PCSpeakerRandomStream::readBuffer(sint16 *buffer, const int numSamples) {
 
 //**************** PCSpeakerStutterStream
 
-PCSpeakerStutterStream::PCSpeakerStutterStream(sint16 a0, uint16 a2, uint16 a4, uint16 a6, uint16 a8) {
+PCSpeakerStutterStream::PCSpeakerStutterStream(sint16 a0, uint16 a2, uint16 a4, uint16 a6, uint16 a8, uint rate) : PCSpeakerStream(rate) {
 	arg_0 = a0;
 	arg_2 = a2;
 	arg_4 = a4;
@@ -330,7 +331,7 @@ int PCSpeakerStutterStream::readBuffer(sint16 *buffer, const int numSamples) {
 Audio::AudioStream *makePCSpeakerSlugDissolveSfxStream(uint rate) {
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 	for (uint16 i = 0; i < 20; i++) {
-		stream->queueAudioStream(new PCSpeakerRandomStream((NUVIE_RAND() % 0x1068) + 0x258, 0x15e, 1), DisposeAfterUse::YES);
+		stream->queueAudioStream(new PCSpeakerRandomStream((NUVIE_RAND() % 0x1068) + 0x258, 0x15e, 1, rate), DisposeAfterUse::YES);
 	}
 
 	return stream;
@@ -339,7 +340,7 @@ Audio::AudioStream *makePCSpeakerSlugDissolveSfxStream(uint rate) {
 Audio::AudioStream *makePCSpeakerGlassSfxStream(uint rate) {
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 	for (uint16 i = 0x7d0; i < 0x4e20; i += 0x3e8) {
-		stream->queueAudioStream(new PCSpeakerRandomStream(i, 0x78, 0x28), DisposeAfterUse::YES);
+		stream->queueAudioStream(new PCSpeakerRandomStream(i, 0x78, 0x28, rate), DisposeAfterUse::YES);
 	}
 
 	return stream;
@@ -349,7 +350,7 @@ Audio::AudioStream *makePCSpeakerGlassSfxStream(uint rate) {
 Audio::AudioStream *makePCSpeakerMagicCastingP1SfxStream(uint rate, uint8 magic_circle) {
 	//Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 
-	return new PCSpeakerRandomStream(0x2bc, 0x640 * magic_circle + 0x1f40, 0x320);
+	return new PCSpeakerRandomStream(0x2bc, 0x640 * magic_circle + 0x1f40, 0x320, rate);
 
 	//return stream;
 }
@@ -364,8 +365,8 @@ Audio::AudioStream *makePCSpeakerMagicCastingP2SfxStream(uint rate, uint8 magic_
 
 	const uint16 word_30152[] = {0x226A, 0x1E96, 0x1B94, 0x1996, 0x173E, 0x15C2, 0x143C, 0x12D4, 0x1180};
 
-	stream->queueAudioStream(new PCSpeakerStutterStream(word_30188[magic_circle], word_30164[magic_circle], (magic_circle * 0xfa0) + 0x2710, 1, word_30152[magic_circle]));
-	stream->queueAudioStream(new PCSpeakerStutterStream(-word_30188[magic_circle], word_30176[magic_circle], (magic_circle * 0xfa0) + 0x2710, 1, word_30152[magic_circle]));
+	stream->queueAudioStream(new PCSpeakerStutterStream(word_30188[magic_circle], word_30164[magic_circle], (magic_circle * 0xfa0) + 0x2710, 1, word_30152[magic_circle], rate));
+	stream->queueAudioStream(new PCSpeakerStutterStream(-word_30188[magic_circle], word_30176[magic_circle], (magic_circle * 0xfa0) + 0x2710, 1, word_30152[magic_circle], rate));
 
 	return stream;
 }
@@ -375,7 +376,7 @@ Audio::AudioStream *makePCSpeakerAvatarDeathSfxStream(uint rate) {
 
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 	for (uint8 i = 0; i < 8; i++) {
-		stream->queueAudioStream(new PCSpeakerStutterStream(3, 1, 0x4e20, 1, avatar_death_tune[i]));
+		stream->queueAudioStream(new PCSpeakerStutterStream(3, 1, 0x4e20, 1, avatar_death_tune[i], rate));
 	}
 
 	return stream;
@@ -384,10 +385,10 @@ Audio::AudioStream *makePCSpeakerAvatarDeathSfxStream(uint rate) {
 Audio::AudioStream *makePCSpeakerKalLorSfxStream(uint rate) {
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 	for (uint8 i = 0; i < 0x32; i++) {
-		stream->queueAudioStream(new PCSpeakerStutterStream((0x32 - i) << 2, 0x2710 - (i << 6), 0x3e8, 1, (i << 4) + 0x320));
+		stream->queueAudioStream(new PCSpeakerStutterStream((0x32 - i) << 2, 0x2710 - (i << 6), 0x3e8, 1, (i << 4) + 0x320, rate));
 	}
 
-	stream->queueAudioStream(new PCSpeakerStutterStream(8, 0, 0x1f40, 1, 0x640));
+	stream->queueAudioStream(new PCSpeakerStutterStream(8, 0, 0x1f40, 1, 0x640, rate));
 
 	return stream;
 }
@@ -397,7 +398,7 @@ Audio::AudioStream *makePCSpeakerHailStoneSfxStream(uint rate) {
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 
 	for (uint16 i = 0; i < 0x28; i++) {
-		stream->queueAudioStream(new PCSpeakerFreqStream((NUVIE_RAND() % 0x28) + 0x20, 8), DisposeAfterUse::YES);
+		stream->queueAudioStream(new PCSpeakerFreqStream((NUVIE_RAND() % 0x28) + 0x20, 8, rate), DisposeAfterUse::YES);
 	}
 
 	/* The original logic looks something like this. But this doesn't sound right.
@@ -405,9 +406,9 @@ Audio::AudioStream *makePCSpeakerHailStoneSfxStream(uint rate) {
 	for(uint16 i=0;i<0x28;i++)
 	{
 	    if(NUVIE_RAND()%7==0)
-	        stream->queueAudioStream(new PCSpeakerFreqStream(base_freq + (NUVIE_RAND()%0x28), 8), DisposeAfterUse::YES);
+	        stream->queueAudioStream(new PCSpeakerFreqStream(base_freq + (NUVIE_RAND()%0x28), 8, rate), DisposeAfterUse::YES);
 	    else
-	        stream->queueAudioStream(new PCSpeakerFreqStream(0, 8), DisposeAfterUse::YES);
+	        stream->queueAudioStream(new PCSpeakerFreqStream(0, 8, rate), DisposeAfterUse::YES);
 	}
 	 */
 
@@ -418,7 +419,7 @@ Audio::AudioStream *makePCSpeakerEarthQuakeSfxStream(uint rate) {
 	Audio::QueuingAudioStream *stream = Audio::makeQueuingAudioStream(rate, false);
 
 	for (uint16 i = 0; i < 0x28; i++) {
-		stream->queueAudioStream(new PCSpeakerFreqStream((NUVIE_RAND() % 0xb5) + 0x13, 8), DisposeAfterUse::YES);
+		stream->queueAudioStream(new PCSpeakerFreqStream((NUVIE_RAND() % 0xb5) + 0x13, 8, rate), DisposeAfterUse::YES);
 	}
 
 	return stream;
